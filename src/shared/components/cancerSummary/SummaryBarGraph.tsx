@@ -14,6 +14,7 @@ interface ISummaryBarGraphProps {
     legend: boolean;
     setPngAnchor:any;
     setPdfAnchor:any;
+    gene: string;
 }
 
 @observer
@@ -32,24 +33,23 @@ export default class SummaryBarGraph extends React.Component<ISummaryBarGraphPro
         this.updateChart = this.updateChart.bind(this);
     }
 
-    private getTooltipOptions(tooltipModel: any, data:IBarGraphConfigOptions, chartOptions:any) {
-        // $('#chartjs-tooltip').remove();
+    private getTooltipOptions(tooltipModel: any, data:IBarGraphConfigOptions, chartOptions:any, uniqueId:string) {
 
         // Tooltip Element
-        let tooltipEl = document.getElementById('chartjs-tooltip');
+        let tooltipEl = document.getElementById('cancer-type-summary-tab-tooltip-' + uniqueId);
 
         // Create element on first render
         if (!tooltipEl) {
             tooltipEl = document.createElement('div');
-            tooltipEl.id = 'chartjs-tooltip';
+            tooltipEl.id = 'cancer-type-summary-tab-tooltip-' + uniqueId;
+            tooltipEl.className = 'cancer-type-summary-tab-tooltip';
             tooltipEl.innerHTML = "<div></div>";
-            document.getElementsByClassName('cancer-summary-chart-container')[0].appendChild(tooltipEl);
+            this.chartContainer.appendChild(tooltipEl);
         }
 
         // Hide if no tooltip
         if (tooltipModel.opacity === 0) {
             tooltipEl.style.opacity = '0';
-            // tooltipEl.style.display = 'none';
             return;
         }
 
@@ -99,12 +99,11 @@ export default class SummaryBarGraph extends React.Component<ISummaryBarGraphPro
             tableRoot!.innerHTML = innerHtml;
         }
 
-        // `this` will be the overall tooltip
-        const position = chartOptions._chart.canvas.getBoundingClientRect();
+        // `chartOptions` will be the overall tooltip
+        // const position = chartOptions._chart.canvas.getBoundingClientRect();
 
         // Display, position, and set styles for font
         tooltipEl.style.opacity = '1';
-        // tooltipEl.style.display = 'block';
         tooltipEl.style.left =  tooltipModel.caretX + 35 + 'px';
         tooltipEl.style.top = tooltipModel.caretY + 5 + 'px';
     }
@@ -165,7 +164,7 @@ export default class SummaryBarGraph extends React.Component<ISummaryBarGraphPro
                     return false;
                 },
                 custom(tooltipModel: any){
-                    return that.getTooltipOptions(tooltipModel, data, this);}
+                    return that.getTooltipOptions(tooltipModel, data, this, that.props.gene);}
             },
             scales: {
                 xAxes: [{
