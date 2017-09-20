@@ -91,6 +91,7 @@ export default class CancerSummaryContainer extends React.Component<{store: Resu
     }
 
     public render() {
+
         if (this.props.store.alterationCountsForCancerTypesForAllGenes.isComplete &&
             this.props.store.alterationCountsForCancerTypesByGene.isComplete) {
             return (
