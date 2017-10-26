@@ -6,6 +6,7 @@ import FontAwesome from "react-fontawesome";
 import LabeledCheckbox from "../../labeledCheckbox/LabeledCheckbox";
 import {observer} from "mobx-react";
 import {computed} from "mobx";
+import _ from 'lodash';
 import {getStudySummaryUrl, getPubMedUrl} from "../../../api/urls";
 import {QueryStoreComponent} from "../QueryStore";
 import DefaultTooltip from "../../defaultTooltip/DefaultTooltip";
@@ -48,7 +49,7 @@ export interface IStudyListProps
 }
 
 @observer
-export default class StudyList extends QueryStoreComponent<IStudyListProps, void>
+export default class StudyList extends QueryStoreComponent<IStudyListProps, {}>
 {
 	private _view:FilteredCancerTreeView;
 
@@ -82,11 +83,11 @@ export default class StudyList extends QueryStoreComponent<IStudyListProps, void
 			return (
 				<div className={styles.SelectedStudyList}>
 					<span
-						className={styles.deselectAll}
-						onClick={() => {
-							this.view.onCheck(this.store.treeData.rootCancerType, false);
-							this.store.showSelectedStudiesOnly = false;
-						}}
+                    className={styles.deselectAll}
+                    onClick={() => {
+                        this.view.onCheck(this.store.treeData.rootCancerType, false);
+                        this.store.showSelectedStudiesOnly = false;
+                    }}
 					>
 						Deselect all
 					</span>
@@ -103,6 +104,7 @@ export default class StudyList extends QueryStoreComponent<IStudyListProps, void
 		let currentLevel = this.logic.getDepth(cancerType);
 		let childCancerTypes = this.view.getChildCancerTypes(cancerType);
 		let childStudies = this.view.getChildCancerStudies(cancerType);
+		let childStudyIds = this.logic.cancerTypeListView.getDescendantCancerStudies(cancerType).map(study => study.studyId);
 
 		let heading:JSX.Element | undefined;
 		let indentArrow:JSX.Element | undefined;
@@ -127,11 +129,12 @@ export default class StudyList extends QueryStoreComponent<IStudyListProps, void
 						<span className={styles.CancerTypeName}>
 							{cancerType.name}
 						</span>
-						{!!(!this.store.forDownloadTab) && (
-							<span className={styles.SelectAll}>
-								Select All
-							</span>
-						)}
+                            {!!(!this.store.forDownloadTab) && (
+                                <span className={styles.SelectAll}>
+                                    {_.intersection(childStudyIds, this.store.selectedStudyIds).length ?
+                                        'Deselect All' : 'Select All'}
+                                </span>
+                            )}
 					</CancerTreeCheckbox>
 				</li>
 			);
@@ -257,7 +260,7 @@ export interface ICancerTreeCheckboxProps
 }
 
 @observer
-export class CancerTreeCheckbox extends QueryStoreComponent<ICancerTreeCheckboxProps, void>
+export class CancerTreeCheckbox extends QueryStoreComponent<ICancerTreeCheckboxProps, {}>
 {
 	@computed.struct get checkboxProps()
 	{
